@@ -1,5 +1,5 @@
 <template>
-  <BaseCard class="product-card hover:shadow-lg transition-shadow duration-200">
+  <BaseCard class="hover:shadow-lg transition-shadow duration-200">
     <div class="p-4">
       <div class="mb-4 relative aspect-square overflow-hidden rounded-lg">
         <img 
@@ -36,18 +36,34 @@
 
 <script lang="ts" setup>
 const props = defineProps({
-  name: {
-    type: String,
-    required: true
-  },
-  price: {
-    type: Number,
-    required: true
-  },
-  image: {
-    type: String,
-    default: ''
-  }
+  id: {
+      type: String,
+    },
+    sku: {
+      type: String,
+    },
+    name: {
+      type: String,
+    },
+    description: {
+      type: String,
+    },
+    price: {
+      required: true,
+      type: Number,
+    },
+    category: {
+      type: Object,
+    },
+    unitOfMeasure: {
+      type: Object,
+    },
+    active: {
+      type: Boolean,
+    },
+    image: {
+      type: String,
+    },
 })
 
 const emit = defineEmits(['addToCart'])
@@ -60,10 +76,3 @@ function addToCart() {
   emit('addToCart')
 }
 </script>
-
-<style scoped>
-.product-card {
-  min-width: 200px;
-  max-width: 200px;
-}
-</style>
