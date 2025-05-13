@@ -1,10 +1,6 @@
 <template>
   <div>
-    <UiPosDisplay v-model:display-text="displaytext" header="Total: " />
-    <UiPosKeypad @keypad-event-button="eventKeypadCollector" />
-    <UiPosProduct
-      name="Product 1"
-      :price="100" />
+  
   </div>
 </template>
 

@@ -1,21 +1,39 @@
 <template>
-  <div>
-   <UiPosPrinter />
+  <div class="flex h-screen overflow-hidden">
+    <UiPosLayoutSidebar />
+    <div class="flex-1 flex flex-col">
+        <UiPosLayoutHeader />
+        <div class="flex flex-1 overflow-hidden">
+          <UiPosProductPList :products="products"/>
+        </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-
- const cartItems = [
-    { name: 'Item 1', quantity: 2, price: 10 },
-    { name: 'Item 2', quantity: 1, price: 15 },
-    { name: 'Item 3', quantity: 3, price: 5 }
-  ]
-  const cartTotals = {
-    subtotal: 40,
-    tax: 4,
-    total: 44
+// Component logic here
+const products = ref([
+  {
+    sku: 1,
+    name: 'Product 1',
+    price: 100,
+  },
+  {
+    sku: 2,
+    name: 'Product 2',
+    price: 200,
+  },
+  {
+    sku: 3,
+    name: 'Product 3',
+    price: 300,
+  },
+  {
+    sku: 4,
+    name: 'Product 4',
+    price: 400,
   }
+])
 </script>
 
 <style>
