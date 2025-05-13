@@ -1,13 +1,20 @@
 <template>
-  <div>
-    
+  <div class="container">
+    <div class="flex justify-between py-2 border-b">
+      <span>Subtotal:</span>
+      <span>${{ subtotal.toFixed(2) }}</span>
+    </div>
+    <div class="flex justify-between py-2 border-b">
+      <span>Impuestos:</span>
+      <span>${{ tax.toFixed(2) }}</span>
+    </div>
+    <div class="flex justify-between py-2 font-bold text-lg">
+      <span>Total:</span>
+      <span>${{ total.toFixed(2) }}</span>
+    </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-
+<script setup>
+defineProps({ subtotal: Number, tax: Number, total: Number });
 </script>
-
-<style>
-
-</style>

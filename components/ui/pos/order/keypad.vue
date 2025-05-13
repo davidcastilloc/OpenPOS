@@ -5,7 +5,6 @@
       :key="num"
       shape="square"
       color="primary"
-      size="md"
       @click="emits('keypad-event-button', num)"
     >
       {{ num }}
@@ -16,21 +15,3 @@
 <script lang="ts" setup>
 const emits = defineEmits(['keypad-event-button'])
 </script>
-
-<style>
-.container {
-  display: flex;
-  width: 200px;
-  flex-wrap: wrap;
-  border-radius: 5px;
-  border: outset;
-}
-.btn {
-  width: 50px;
-  height: 50px;
-  margin: 2px;
-  text-align: center;
-  border-radius: 5px;
-  border: outset;
-}
-</style>
