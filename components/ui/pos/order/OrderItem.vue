@@ -6,7 +6,7 @@
     </div>
     <div class="flex items-center pr-3">
       <span class="font-medium">${{ (item.price * item.qty).toFixed(2) }}</span>
-      <Icon name="material-symbols:close h-5 w-5"  class="text-red-600" @click="$emit('remove')" />
+      <Icon name="material-symbols:close"  class="text-red-600 h-5 w-5" @click="$emit('remove')" />
     </div>
   </div>
 </template>

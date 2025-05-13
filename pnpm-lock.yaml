@@ -21,6 +21,15 @@ importers:
         specifier: ^4.5.1
         version: 4.5.1(vue@3.5.13(typescript@5.8.3))
     devDependencies:
+      '@iconify-json/ic':
+        specifier: ^1.2.2
+        version: 1.2.2
+      '@iconify-json/material-symbols':
+        specifier: ^1.2.20
+        version: 1.2.20
+      '@iconify-json/tdesign':
+        specifier: ^1.2.8
+        version: 1.2.8
       '@shuriken-ui/nuxt':
         specifier: 4.0.0-beta.4
         version: 4.0.0-beta.4(magicast@0.3.5)(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.12)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.1))(vue@3.5.13(typescript@5.8.3))
@@ -483,6 +492,15 @@ packages:
 
   '@floating-ui/vue@1.1.6':
     resolution: {integrity: sha512-XFlUzGHGv12zbgHNk5FN2mUB7ROul3oG2ENdTpWdE+qMFxyNxWSRmsoyhiEnpmabNm6WnUvR1OvJfUfN4ojC1A==}
+
+  '@iconify-json/ic@1.2.2':
+    resolution: {integrity: sha512-QmjwS3lYiOmVWgTCEOTFyGODaR/+689+ajep/VsrCcsUN0Gdle5PmIcibDsdmRyrOsW/E77G41UUijdbjQUofw==}
+
+  '@iconify-json/material-symbols@1.2.20':
+    resolution: {integrity: sha512-+KqOT+3fD+LC2FbWiV8gd4+JLMiVUtmqrjzpKN1ji7rfMQTwvYJ94RT0WQlmL+vfDNJ5MTRe3rBzzJyvIH/aSg==}
+
+  '@iconify-json/tdesign@1.2.8':
+    resolution: {integrity: sha512-Q/Ty43etGvXFkEVLYOW2cRaQFbjZoXcOvmOktJRludaN9SX5NeA86VvpriHAfsnsKnRGh0udLy8UscA5JumZKg==}
 
   '@iconify/collections@1.0.546':
     resolution: {integrity: sha512-ftDzfvN+9lX0zNeKrgunE2HmWGfek7hKJJC6R16pc/JU7Wv0uibJ6MS2cRlmrjUFvtl0Kl2c2wbZZGRgFmKvTg==}
@@ -4493,6 +4511,18 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
+
+  '@iconify-json/ic@1.2.2':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/material-symbols@1.2.20':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/tdesign@1.2.8':
+    dependencies:
+      '@iconify/types': 2.0.0
 
   '@iconify/collections@1.0.546':
     dependencies:
