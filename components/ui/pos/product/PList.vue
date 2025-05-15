@@ -10,7 +10,7 @@
       </div>
     </div>
     <!-- Product Cards -->
-    <PCard v-for="product in products" :key="product.sku" v-bind="product" @add="$emit('add-product', product)" />
+    <PCard v-for="product in products" :key="product.sku" v-bind="product" @add="emits('add-product', product)" />
   </div>
 </template>
 
@@ -18,5 +18,5 @@
 import PCard from './PCard.vue';
 
 defineProps({ products: Array });
-defineEmits(['add-product']);
+const emits = defineEmits(['add-product']);
 </script>

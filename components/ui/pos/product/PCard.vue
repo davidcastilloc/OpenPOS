@@ -66,13 +66,13 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['addToCart'])
+const emit = defineEmits(['add'])
 
 const productImage = computed(() => {
   return props.image
 })
 
 function addToCart() {
-  emit('addToCart')
+  emit('add')
 }
 </script>
