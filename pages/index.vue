@@ -12,18 +12,13 @@
             <h2 class="text-xl font-medium">Order</h2>
             <Icon class="text-sm text-gray-500 -ms-1 h-7 w-7" name="tdesign:clear"></Icon>
           </div>
-          <div class="flex flex-col overflow-scroll">
+          <div class="flex flex-col h-full overflow-scroll">
             <UiPosOrderItem v-for="product in order.items" :key="product.sku" :item="product" />
           </div>
           <div class="flex justify-between items-center mt-4">
-            <UiPosOrderSummary    
-            :subtotalGeneral="subtotalGeneral"
-            :ivaGeneral="ivaGeneral"
-            :subtotalReduced="subtotalReduced"
-            :ivaReduced="ivaReduced"
-            :subtotalExempt="subtotalExempt"
-            :totalIva="totalIva"
-            :total="total" />
+            <UiPosOrderSummary :subtotalGeneral="subtotalGeneral" :ivaGeneral="ivaGeneral"
+              :subtotalReduced="subtotalReduced" :ivaReduced="ivaReduced" :subtotalExempt="subtotalExempt"
+              :totalIva="totalIva" :total="total" />
           </div>
           <div class="flex justify">
             <UiPosOrderKeypad />
@@ -38,50 +33,33 @@
 </template>
 
 <script lang="ts" setup>
-import type { Product, Order } from '../types'
+import type { Product, Order } from '../types/pos'
 
-const products = <Product[]>ref([
+const products = ref<Product[]>([
   {
     sku: 1,
+    id: 1,
     name: 'Product 1',
+    quantity: 0,
     price: 100,
     ivaRate: "general"
   },
-  {
-    sku: 2,
-    name: 'Product 2',
-    price: 200,
-    ivaRate: "reduced"
-  },
-  {
-    sku: 3,
-    name: 'Product 3',
-    price: 300,
-    ivaRate: "exempt"
-  },
-  {
-    sku: 4,
-    name: 'Product 4',
-    price: 400,
-    ivaRate: "general"
-  }
 ])
 
-const order = ref({items:[]})
+const order = ref<Order>({ items: [] })
 
-const { subtotalGeneral, ivaGeneral, subtotalReduced, ivaReduced, subtotalExempt, totalIva, total } = useCalculateOrder(order.value)
+const { subtotalGeneral, ivaGeneral, subtotalReduced, 
+  ivaReduced, subtotalExempt, totalIva, total } = useCalculateOrder(order)
 
 const addProductToOrder = (product: Product) => {
   // check if product is already in order
   const index = order.value.items.findIndex((item: any) => item.sku === product.sku)
   if (index === -1) {
     order.value.items.push({
-     ...product,
+      ...product,
       quantity: 1,
-  })
-  } else {
-    console.log('product already in order')
-    order.value.items[index].quantity++
-  }
+    })
+  } 
+  order.value.items[index].quantity++
 }
 </script>

@@ -1,5 +1,6 @@
 interface Product {
     id: number;
+    sku: number;
     name: string;
     price: number;
     quantity: number;
