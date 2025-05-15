@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
     modules: [
       '@shuriken-ui/nuxt',
+      '@pinia/nuxt'
     ],
     css: [
       '~/assets/css/main.css',
