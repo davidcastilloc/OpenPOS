@@ -1,14 +1,15 @@
 interface Product {
-    cod: number;
+    id: number;
+    cod: string;
     sku: number;
-    descripcion: string;
-    unidad_venta: string;
-    pdivisa: number;
+    description: string;
+    unit: string;
+    p_usd: number;
+    p_bs: number;
     iva_rate: 'general' | 'reduced' | 'exempt'; // Permite "exempt" o cualquier otra cadena si hay otros valores posibles
-    pbolivares: number | null;
-    categoria: string;
-    margen_de_ganancia_sugerido: number | null;
-    ubicacion: string | null;
+    category: string;
+    profit: number | null;
+    location: string | null;
   }
 
   interface Sale {

@@ -5,7 +5,7 @@
       <UiPosLayoutHeader />
       <div class="flex flex-1 overflow-hidden">
         <div class="w-1/2 p-4 overflow-y-auto">
-          <UiPosProductPList :products="products" @add-product="addProductToOrder" />
+          <UiPosProductPList :products="data.products" @add-product="addProductToOrder" />
         </div>
         <div class="w-1/2 bg-white border-l p-4 flex flex-col">
           <div class="flex justify-between items-center mb-4">
@@ -35,7 +35,7 @@
 <script lang="ts" setup>
 import type { Product } from '../types/pos'
 
-const { data: products } = await useAsyncData('products', () => $fetch('http://localhost:5001/products'))
+const { data } = await useAsyncData('products', () => $fetch('/api/sheet-data?cached'))
 
 // use Store to fetch dolar price
 const  dolarStore = useMyDolarStore()
@@ -62,7 +62,7 @@ const { subtotalGeneral, ivaGeneral, subtotalReduced,
 const addProductToOrder = (product: any) => {
   const index = order.value.items.findIndex((item) => item.sku === product.sku)
   if (index === -1) {
-    order.value.items.push({ ...product, quantity: 1 , price: Number(getDolar.value * product.pdivisa).toFixed(2)})
+    order.value.items.push({ ...product, quantity: 1 , price: Number(getDolar.value * product.p_usd).toFixed(2)})
   } else {
     order.value.items[index].quantity++
   }

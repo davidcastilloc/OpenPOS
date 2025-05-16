@@ -16,11 +16,11 @@
       </div>
       
       <div class="flex flex-col gap-2">
-        <h3 class="font-semibold text-lg text-gray-900 dark:text-white">
-          {{ descripcion }}
+        <h3 class="text-sm text-gray-900 dark:text-white">
+          {{ description }}
         </h3>
         <div class="flex justify-between items-center">
-          <span class="text-primary-500 font-bold text-xl">
+          <span class="text-primary-500 font-semibold text-xl">
             Bs {{ precioAlCambioDolar }}
           </span>
           <BaseButton
@@ -38,21 +38,52 @@
 const  dolarStore = useMyDolarStore()
 const { getDolar } = storeToRefs(dolarStore)
 
-const props = defineProps({
-    "cod": String,
-    "sku": Number,
-    "descripcion": String,
-    "unidad_venta": String,
-    "pdivisa": Number,
-    "iva_rate": String,
-    "image": String,
-    "pbolivares": null,
-    "categoria": String,
-    "margen_de_ganancia_sugerido": Number,
-    "ubicacion": null
-})
+const props = defineProps(
+  {
+   id: {
+      type: Number,
+      required: true
+    },
+    cod:{
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
+      required: true
+    },
+    unit: {
+      type: String,
+      required: true
+    },
+    p_usd: {
+      type: Number,
+      required: true
+    },
+    p_bs: {
+      type: Number,
+      required: true
+    },
+    iva_rate: {
+      type: String,
+      required: true
+    },
+    category: {
+      type: String,
+      required: false
+    },
+    profit: {
+      type: Number,
+      required: false
+    },
+    location: {
+      type: String,
+      required: false
+    },
+  }
+)
 const precioAlCambioDolar = computed(() => {
-  return (props.pdivisa?.toFixed(2) * getDolar.value).toFixed(2)
+  return (props.p_usd?.toFixed(2) * getDolar.value).toFixed(2)
 })
 const emit = defineEmits(['add'])
 

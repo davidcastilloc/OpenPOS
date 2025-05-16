@@ -1,7 +1,7 @@
 <template>
   <div class="border-b flex justify-between">
     <div>
-      <div class="font-medium">{{ item.descripcion }}</div>
+      <div class="font-medium">{{ item.description }}</div>
       <div class="text-sm text-gray-500">Bs {{ item.price }} x {{ item.quantity }}</div>
     </div>
     <div class="flex items-center pr-3">
