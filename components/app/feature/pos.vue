@@ -1,42 +1,75 @@
 <template>
   <div class="flex h-screen overflow-hidden">
     <UiPosLayoutSidebar />
-    <!--Modals Globales-->
-    <UiPosLayoutUiModal v-model="modalIsOpen"
+
+    <!-- Modales Globales -->
+    <UiPosLayoutUiModal v-show="modalPaymentIsOpen"
       class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg z-50 w-1/2">
-      <UiPosPaymentModalContent :total="total" :dolar-rate="getDolar" @payment-processed="handlePaymentProcesed" />
+      <UiPosPaymentModalContent
+        :total="total"
+        :dolar-rate="getDolar"
+        @payment-processed="handlePaymentProcessed"
+      />
     </UiPosLayoutUiModal>
+
+    <UiPosLayoutUiModal v-show="modalReceiptIsOpen"
+      class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg z-50 w-1/2">
+      <UiPosPaymentConfirmateReceipt 
+        :order="order.items" 
+        :subtotalGeneral="subtotalGeneral"
+        :ivaGeneral="ivaGeneral"
+        :subtotalReduced="subtotalReduced"
+        :ivaReduced="ivaReduced"
+        :subtotalExempt="subtotalExempt"
+        :totalIva="totalIva"
+        :total="total"
+        @confirm="eventConfirmPrint"
+        @cancel="eventCancelPrint"
+        />
+    </UiPosLayoutUiModal>
+
     <div class="flex-1 flex flex-col">
       <UiPosLayoutHeader />
+
       <div class="flex flex-1 overflow-hidden">
+        <!-- Lista de productos -->
         <div class="w-1/2 p-4 overflow-y-auto">
           <UiPosProductPList :products="data.products" @add-product="addProductToOrder" />
         </div>
+
+        <!-- Orden -->
         <div class="w-1/2 bg-white border-l p-4 flex flex-col">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold">Recibo</h2>
-            <p v-show="order.items.length > 0" class="text-sm font-bold"
-              :class="paymentProcessed?.value ? 'text-green-400' : 'text-red-400'">
-              {{ paymentProcessed?.value ? 'Pago Procesado' : 'Pendiente de pago' }}
+            <p v-if="order.items.length > 0" class="text-sm font-bold"
+              :class="paymentIsProcessed ? 'text-green-400' : 'text-red-400'">
+              {{ paymentIsProcessed ? 'Pago Procesado' : 'Pendiente de pago' }}
             </p>
-            <Icon class="text-sm text-gray-500 -ms-1 h-7 w-7" name="tdesign:clear"></Icon>
+            <Icon class="text-sm text-gray-500 -ms-1 h-7 w-7" name="tdesign:clear" />
           </div>
+
           <div class="flex flex-col h-full overflow-scroll">
             <UiPosOrderItem v-for="product in order.items" :key="product.sku" :item="product" />
           </div>
+
           <div class="flex justify-between items-center mt-4">
-            <UiPosOrderSummary :subtotalGeneral="subtotalGeneral" :ivaGeneral="ivaGeneral"
-              :subtotalReduced="subtotalReduced" :ivaReduced="ivaReduced" :subtotalExempt="subtotalExempt"
-              :totalIva="totalIva" :total="total" />
+            <UiPosOrderSummary
+              :subtotalGeneral="subtotalGeneral"
+              :ivaGeneral="ivaGeneral"
+              :subtotalReduced="subtotalReduced"
+              :ivaReduced="ivaReduced"
+              :subtotalExempt="subtotalExempt"
+              :totalIva="totalIva"
+              :total="total"
+            />
           </div>
-          <!-- <div class="flex justify">
-            <UiPosOrderKeypad />
-          </div> -->
+
           <div class="flex justify-end mt-4">
-            <UiPosOrderActionButtons @click-pay="eventClickPayment(total)" @click-receipt="eventClickReceipt({
-              order, subtotalGeneral, ivaGeneral, subtotalReduced,
-              ivaReduced, subtotalExempt, totalIva, total
-            })" />
+            <UiPosOrderActionButtons
+              :b-paid-active="orderIsValid && !paymentIsProcessed"
+              @click-pay="eventClickPayment"
+              @click-receipt="eventClickReceipt"
+            />
           </div>
         </div>
       </div>
@@ -45,83 +78,103 @@
 </template>
 
 <script lang="ts" setup>
-import type { Product } from '../types/pos'
-import { usePocketBase } from '~/composables/usePocketBase'
+import type { Product } from '~/types/pos'
 
+// Data de productos
 const { data } = await useAsyncData('products', () => $fetch('/api/sheet-data?cached'))
 
-const showModal = ref(true)
+// Estados
+const modalPaymentIsOpen = ref(false)
+const modalReceiptIsOpen = ref(false)
+const paymentIsProcessed = ref(false)
 
-const operationNumber = ref(1)
-
-const paymentProcessed = reactive({
-  
-})
-
-// use Store to fetch dolar price
+// Obtener dólar
 const dolarStore = useMyDolarStore()
 const { getDolar } = storeToRefs(dolarStore)
 
 onMounted(() => {
   dolarStore.fetchDolar()
 })
+
+// Tipos y orden
 interface productOrder extends Product {
-  price: number;
-  quantity: number;
+  price: number
+  quantity: number
 }
 
 interface Order {
-  items: productOrder[];
+  items: productOrder[]
 }
 
 const order = ref<Order>({ items: [] })
 
-const { subtotalGeneral, ivaGeneral, subtotalReduced,
-  ivaReduced, subtotalExempt, totalIva, total } = useCalculateOrder(order)
+// Cálculos del total
+const {
+  subtotalGeneral,
+  ivaGeneral,
+  subtotalReduced,
+  ivaReduced,
+  subtotalExempt,
+  totalIva,
+  total,
+} = useCalculateOrder(order)
 
-const addProductToOrder = (product: any) => {
-  const index = order.value.items.findIndex((item) => item.sku === product.sku)
+// Agregar producto a la orden
+const addProductToOrder = (product: Product) => {
+  const index = order.value.items.findIndex(item => item.sku === product.sku)
   if (index === -1) {
-    order.value.items.push({ ...product, quantity: 1, price: Number(getDolar.value * product.p_usd).toFixed(2) })
+    order.value.items.push({
+      ...product,
+      quantity: 1,
+      price: parseFloat((getDolar.value * product.p_usd).toFixed(2)),
+    })
   } else {
     order.value.items[index].quantity++
   }
 }
 
-const modalIsOpen = ref(false)
+// Validaciones y eventos
+const orderIsValid = computed(() => order.value.items.length > 0)
 
-const eventClickPayment = (total: Number) => {
-  console.log('click payment open modal for payment', total)
-  // validate payment 0
-  if (total === 0) {
-    return
-  }
-  modalIsOpen.value = true
-  console.log('modalIsOpen', modalIsOpen.value)
+const eventClickPayment = () => {
+  if (total.value === 0) return
+  modalPaymentIsOpen.value = true
 }
 
-const eventClickReceipt = (data: any) => {
-  console.log('click receipt open modal for receipt', data)
-
+const eventClickReceipt = () => {
+  modalReceiptIsOpen.value = true
 }
 
-const handlePaymentProcesed = async (data: any) => {
+const paymentProcessedData = ref({})
+// Procesar pago
+const handlePaymentProcessed = async (data: any) => {
   const { methods, total, totalPaid, change } = data
-  if (!methods) {
-    return
-  }
-  modalIsOpen.value = false
-  // call to pocket base api to save payment
+  if (!methods) return
+
+  modalPaymentIsOpen.value = false
+
   const payment = {
-    "cash_session_id": "49221efdf3986n6",
-    "methods": methods,
-    "number_total": total.toFixed(2),
-    "number_totalPaid": totalPaid.toFixed(2),
-    "number_change": change.toFixed(2),
-  };
+    cash_session_id: "49221efdf3986n6",
+    methods,
+    number_total: total.toFixed(2),
+    number_totalPaid: totalPaid.toFixed(2),
+    number_change: change.toFixed(2),
+  }
+
   const { pb } = usePocketBase()
-  let result = await pb.value.collection('payments').create(payment)
-  console.log('result', result)
-  paymentProcessed.value = result
+  const result = await pb.value.collection('payments').create(payment)
+  paymentProcessedData.value = result
+  paymentIsProcessed.value = true
 }
+
+const eventConfirmPrint = () => {
+  // TODO: Enviar datos al backend de impresión de recibo
+  // Cerrar el modal
+  modalReceiptIsOpen.value = false
+}
+const eventCancelPrint = () => {
+  // Cerrar el modal
+  modalReceiptIsOpen.value = false
+}
+
 </script>
