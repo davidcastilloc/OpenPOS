@@ -20,9 +20,9 @@
               :subtotalReduced="subtotalReduced" :ivaReduced="ivaReduced" :subtotalExempt="subtotalExempt"
               :totalIva="totalIva" :total="total" />
           </div>
-          <div class="flex justify">
+          <!-- <div class="flex justify">
             <UiPosOrderKeypad />
-          </div>
+          </div> -->
           <div class="flex justify-end mt-4">
             <UiPosOrderActionButtons />
           </div>
