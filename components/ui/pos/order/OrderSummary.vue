@@ -3,21 +3,21 @@
     <!-- General -->
     <div v-if="subtotalGeneral" class="flex justify-between">
       <span class="text-gray-600">Subtotal General (16%)</span>
-      <span class="font-medium">Bs {{ subtotalGeneral }}</span>
+      <span class="font-medium">Bs {{ (subtotalGeneral).toFixed(2) }}</span>
     </div>
     <div v-if="ivaGeneral" class="flex justify-between">
       <span class="text-gray-600">IVA General (16%)</span>
-      <span class="font-medium">Bs {{ ivaGeneral }}</span>
+      <span class="font-medium">Bs {{ (ivaGeneral).toFixed(2) }}</span>
     </div>
 
     <!-- Reduced -->
     <div v-if="subtotalReduced" class="flex justify-between">
       <span class="text-gray-600">Subtotal Reducido (8%)</span>
-      <span class="font-medium">Bs {{ subtotalReduced }}</span>
+      <span class="font-medium">Bs {{ (subtotalReduced).toFixed(2) }}</span>
     </div>
     <div v-if="ivaReduced" class="flex justify-between">
       <span class="text-gray-600">IVA Reducido (8%)</span>
-      <span class="font-medium">Bs {{ ivaReduced }}</span>
+      <span class="font-medium">Bs {{ (ivaReduced).toFixed(2) }}</span>
     </div>
 
     <!-- Exempt -->
