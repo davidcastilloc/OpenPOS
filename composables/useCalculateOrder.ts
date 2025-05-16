@@ -1,13 +1,11 @@
-interface Product {
-  id: number;
-  name: string;
-  price: number;
+import type { Product } from "~/types/pos";
+interface productOrder  extends Product{
   quantity: number;
-  ivaRate: 'general' | 'reduced' | 'exempt';
+  price: number;
 }
 
 interface Order {
-  items: Product[];
+  items: productOrder[];
 }
 
 const IVA_RATES = {
@@ -19,10 +17,10 @@ const IVA_RATES = {
 export const useCalculateOrder = (order: Ref<Order>) => {
   const currentOrder = toRef(order);
 
-  const calculateSubtotal = (rateType: Product['ivaRate']) =>
+  const calculateSubtotal = (rateType: productOrder['iva_rate']) =>
     computed(() =>
       currentOrder.value.items
-        ?.filter((item) => item.ivaRate === rateType)
+        ?.filter((item) => item.iva_rate === rateType)
         .reduce((sum, item) => sum + item.price * item.quantity, 0) ?? 0
     );
 

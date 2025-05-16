@@ -5,7 +5,7 @@
         <img 
           v-if="productImage"
           :src="productImage" 
-          :alt="name"
+          :alt="productImage"
           class="w-auto object-cover"
         />
         <Icon
@@ -17,11 +17,11 @@
       
       <div class="flex flex-col gap-2">
         <h3 class="font-semibold text-lg text-gray-900 dark:text-white">
-          {{ name }}
+          {{ descripcion }}
         </h3>
         <div class="flex justify-between items-center">
           <span class="text-primary-500 font-bold text-xl">
-            ${{ price }}
+            Bs {{ precioAlCambioDolar }}
           </span>
           <BaseButton
             class="!px-3 !py-2"
@@ -35,37 +35,25 @@
 </template>
 
 <script lang="ts" setup>
-const props = defineProps({
-  id: {
-      type: String,
-    },
-    sku: {
-      type: String,
-    },
-    name: {
-      type: String,
-    },
-    description: {
-      type: String,
-    },
-    price: {
-      required: true,
-      type: Number,
-    },
-    category: {
-      type: Object,
-    },
-    unitOfMeasure: {
-      type: Object,
-    },
-    active: {
-      type: Boolean,
-    },
-    image: {
-      type: String,
-    },
-})
+const  dolarStore = useMyDolarStore()
+const { getDolar } = storeToRefs(dolarStore)
 
+const props = defineProps({
+    "cod": String,
+    "sku": Number,
+    "descripcion": String,
+    "unidad_venta": String,
+    "pdivisa": Number,
+    "iva_rate": String,
+    "image": String,
+    "pbolivares": null,
+    "categoria": String,
+    "margen_de_ganancia_sugerido": Number,
+    "ubicacion": null
+})
+const precioAlCambioDolar = computed(() => {
+  return (props.pdivisa?.toFixed(2) * getDolar.value).toFixed(2)
+})
 const emit = defineEmits(['add'])
 
 const productImage = computed(() => {

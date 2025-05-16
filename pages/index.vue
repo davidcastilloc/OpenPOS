@@ -33,33 +33,38 @@
 </template>
 
 <script lang="ts" setup>
-import type { Product, Order } from '../types/pos'
+import type { Product } from '../types/pos'
 
-const products = ref<Product[]>([
-  {
-    sku: 1,
-    id: 1,
-    name: 'Product 1',
-    quantity: 0,
-    price: 100,
-    ivaRate: "general"
-  },
-])
+const { data: products } = await useAsyncData('products', () => $fetch('http://localhost:5001/products'))
+
+// use Store to fetch dolar price
+const  dolarStore = useMyDolarStore()
+const { getDolar } = storeToRefs(dolarStore)
+
+onMounted( () => {
+  dolarStore.fetchDolar()
+})
+interface productOrder  extends Product{
+  price: number;
+  quantity: number;
+}
+
+interface Order {
+  items: productOrder[];
+}
 
 const order = ref<Order>({ items: [] })
+
 
 const { subtotalGeneral, ivaGeneral, subtotalReduced, 
   ivaReduced, subtotalExempt, totalIva, total } = useCalculateOrder(order)
 
-const addProductToOrder = (product: Product) => {
-  // check if product is already in order
-  const index = order.value.items.findIndex((item: any) => item.sku === product.sku)
+const addProductToOrder = (product: any) => {
+  const index = order.value.items.findIndex((item) => item.sku === product.sku)
   if (index === -1) {
-    order.value.items.push({
-      ...product,
-      quantity: 1,
-    })
-  } 
-  order.value.items[index].quantity++
+    order.value.items.push({ ...product, quantity: 1 , price: Number(getDolar.value * product.pdivisa).toFixed(2)})
+  } else {
+    order.value.items[index].quantity++
+  }
 }
 </script>

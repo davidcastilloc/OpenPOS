@@ -23,18 +23,18 @@
     <!-- Exempt -->
     <div v-if="subtotalExempt" class="flex justify-between">
       <span class="text-gray-600">Subtotal Exento (0%)</span>
-      <span class="font-medium">Bs {{ subtotalExempt }}</span>
+      <span class="font-medium">Bs {{ (subtotalExempt).toFixed(2) }}</span>
     </div>
 
     <!-- Totals -->
     <div v-if="totalIva" class="flex justify-between border-t pt-1">
       <span class="text-gray-700">Total IVA</span>
-      <span class="font-semibold">Bs {{ totalIva }}</span>
+      <span class="font-semibold">Bs {{ (totalIva).toFixed(2)  }}</span>
     </div>
 
     <div class="flex justify-between border-t pt-1 text-sm">
       <span class="text-black font-bold">TOTAL</span>
-      <span class="font-bold">Bs {{ total || 0 }}</span>
+      <span class="font-bold">Bs {{ (total).toFixed(2) || 0 }}</span>
     </div>
   </div>
 </template>
