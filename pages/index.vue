@@ -1,70 +1,100 @@
 <template>
-  <div class="flex h-screen overflow-hidden">
-    <UiPosLayoutSidebar />
-    <div class="flex-1 flex flex-col">
-      <UiPosLayoutHeader />
-      <div class="flex flex-1 overflow-hidden">
-        <div class="w-1/2 p-4 overflow-y-auto">
-          <UiPosProductPList :products="data.products" @add-product="addProductToOrder" />
-        </div>
-        <div class="w-1/2 bg-white border-l p-4 flex flex-col">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-medium">Order</h2>
-            <Icon class="text-sm text-gray-500 -ms-1 h-7 w-7" name="tdesign:clear"></Icon>
-          </div>
-          <div class="flex flex-col h-full overflow-scroll">
-            <UiPosOrderItem v-for="product in order.items" :key="product.sku" :item="product" />
-          </div>
-          <div class="flex justify-between items-center mt-4">
-            <UiPosOrderSummary :subtotalGeneral="subtotalGeneral" :ivaGeneral="ivaGeneral"
-              :subtotalReduced="subtotalReduced" :ivaReduced="ivaReduced" :subtotalExempt="subtotalExempt"
-              :totalIva="totalIva" :total="total" />
-          </div>
-          <!-- <div class="flex justify">
-            <UiPosOrderKeypad />
-          </div> -->
-          <div class="flex justify-end mt-4">
-            <UiPosOrderActionButtons />
-          </div>
-        </div>
+  <div class="min-h-screen flex items-center justify-center bg-muted-100 dark:bg-muted-900">
+    <div class="w-full max-w-md p-6">
+      <div class="text-center mb-8">
+        <h1 class="font-bold text-3xl text-muted-800 dark:text-white mb-2">
+          Welcome Back
+        </h1>
+        <p class="text-muted-400">
+          Sign in to your POS account
+        </p>
       </div>
+
+      <form @submit.prevent="handleLogin" class="space-y-4">
+        <div class="space-y-2">
+          <BaseInput
+            v-model="form.user"
+            label="Email"
+            placeholder="Enter your email"
+            :error="errors.user"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <BaseInput
+            v-model="form.password"
+            label="Password"
+            type="password"
+            placeholder="Enter your password"
+            :error="errors.password"
+          />
+        </div>
+
+        <div class="flex items-center justify-between">
+          <BaseCheckbox v-model="form.remember" label="Remember me" />
+          <NuxtLink to="/forgot-password" class="text-primary-500 hover:text-primary-400">
+            Forgot Password?
+          </NuxtLink>
+        </div>
+
+        <BaseButton
+          type="submit"
+          :loading="loading"
+          class="w-full"
+        >
+          Sign In
+        </BaseButton>
+      </form>
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-import type { Product } from '../types/pos'
-
-const { data } = await useAsyncData('products', () => $fetch('/api/sheet-data?cached'))
-
-// use Store to fetch dolar price
-const  dolarStore = useMyDolarStore()
-const { getDolar } = storeToRefs(dolarStore)
-
-onMounted( () => {
-  dolarStore.fetchDolar()
+<script setup>
+const loading = ref(false)
+const form = reactive({
+  email: '',
+  password: '',
+  remember: false
 })
-interface productOrder  extends Product{
-  price: number;
-  quantity: number;
+
+const errors = reactive({
+  email: '',
+  password: ''
+})
+
+const validateForm = () => {
+  let isValid = true
+  errors.user = ''
+  errors.password = ''
+
+  if (!form.user) {
+    errors.user = 'User is required'
+    isValid = false
+  } 
+
+  if (!form.password) {
+    errors.password = 'Password is required'
+    isValid = false
+  } else if (form.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters'
+    isValid = false
+  }
+
+  return isValid
 }
 
-interface Order {
-  items: productOrder[];
-}
+const handleLogin = async () => {
+  if (!validateForm()) return
 
-const order = ref<Order>({ items: [] })
-
-
-const { subtotalGeneral, ivaGeneral, subtotalReduced, 
-  ivaReduced, subtotalExempt, totalIva, total } = useCalculateOrder(order)
-
-const addProductToOrder = (product: any) => {
-  const index = order.value.items.findIndex((item) => item.sku === product.sku)
-  if (index === -1) {
-    order.value.items.push({ ...product, quantity: 1 , price: Number(getDolar.value * product.p_usd).toFixed(2)})
-  } else {
-    order.value.items[index].quantity++
+  try {
+    loading.value = true
+    // Add your login logic here
+    await new Promise(resolve => setTimeout(resolve, 1000)) // Simulated API call
+    navigateTo('/dashboard')
+  } catch (error) {
+    console.error('Login failed:', error)
+  } finally {
+    loading.value = false
   }
 }
 </script>

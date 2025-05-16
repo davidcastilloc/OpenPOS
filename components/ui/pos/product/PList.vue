@@ -9,10 +9,8 @@
           placeholder="SKU / Barcode"
           v-model="searchTerm"
           @keydown.enter="handleEnter"
+          tabindex="1"
         />
-        <BaseButton>
-          <Icon name="ic:outline-search" />
-        </BaseButton>
       </div>
     </div>
 
@@ -21,11 +19,10 @@
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
-            <th class="px-6 py-3">SKU</th>
-            <th class="px-6 py-3">Description</th>
-            <th class="px-6 py-3">Unit</th>
-            <th class="px-6 py-3">Price</th>
-            <th class="px-6 py-3">Actions</th>
+            <th class="px-6 py-3">Descripcion</th>
+            <th class="px-6 py-3">Unidad</th>
+            <th class="px-6 py-3">Precio</th>
+            <th class="px-6 py-3"></th>
           </tr>
         </thead>
         <tbody>
@@ -34,11 +31,10 @@
             :key="product.id"
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
           >
-            <td class="px-6 py-4">{{ product.sku }}</td>
             <td class="px-6 py-4">{{ product.description }}</td>
             <td class="px-6 py-4">{{ product.unit }}</td>
-            <td class="px-6 py-4">{{ product.p_bs }}</td>
-            <td class="px-6 py-4">
+            <td class="px-6 py-4">Bs {{ product.p_bs }}</td>
+            <td >
               <BaseButton @click="emits('add-product', product)">
                 <Icon name="ic:outline-add" />
               </BaseButton>
@@ -115,5 +111,24 @@ const handleEnter = () => {
     filteredProducts.value = props.products; // Reinicia la lista
   }
 };
+
+// set focus to input on mount and searchTerm change and after 100ms of inactivity
+watch(searchTerm, () => {
+  setTimeout(() => {
+    const input = document.querySelector('input');
+    if (input) {
+      input.focus();
+    }
+  }, 100);
+})
+
+onMounted(() => {
+  setTimeout(() => {
+    const input = document.querySelector('input');
+    if (input) {
+      input.focus();
+    }
+  }, 100);
+});
 
 </script>
