@@ -5,27 +5,14 @@
     <!-- Modales Globales -->
     <UiPosLayoutUiModal v-show="modalPaymentIsOpen"
       class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg z-50 w-1/2">
-      <UiPosPaymentModalContent
-        :total="total"
-        :dolar-rate="getDolar"
-        @payment-processed="handlePaymentProcessed"
-      />
+      <UiPosPaymentModalContent :total="total" :dolar-rate="getDolar" @payment-processed="handlePaymentProcessed" />
     </UiPosLayoutUiModal>
 
     <UiPosLayoutUiModal v-show="modalReceiptIsOpen"
       class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg z-50 w-1/2">
-      <UiPosPaymentConfirmateReceipt 
-        :order="order.items" 
-        :subtotalGeneral="subtotalGeneral"
-        :ivaGeneral="ivaGeneral"
-        :subtotalReduced="subtotalReduced"
-        :ivaReduced="ivaReduced"
-        :subtotalExempt="subtotalExempt"
-        :totalIva="totalIva"
-        :total="total"
-        @confirm="eventConfirmPrint"
-        @cancel="eventCancelPrint"
-        />
+      <UiPosPaymentConfirmateReceipt :order="order.items" :subtotalGeneral="subtotalGeneral" :ivaGeneral="ivaGeneral"
+        :subtotalReduced="subtotalReduced" :ivaReduced="ivaReduced" :subtotalExempt="subtotalExempt"
+        :totalIva="totalIva" :total="total" @confirm="eventConfirmPrint" @cancel="eventCancelPrint" />
     </UiPosLayoutUiModal>
 
     <div class="flex-1 flex flex-col">
@@ -34,7 +21,7 @@
       <div class="flex flex-1 overflow-hidden">
         <!-- Lista de productos -->
         <div class="w-1/2 p-4 overflow-y-auto">
-          <UiPosProductPList :products="data.products" @add-product="addProductToOrder" />
+          <UiPosProductPList :rate="getDolar" :products="data" @add-product="addProductToOrder" />
         </div>
 
         <!-- Orden -->
@@ -45,7 +32,7 @@
               :class="paymentIsProcessed ? 'text-green-400' : 'text-red-400'">
               {{ paymentIsProcessed ? 'Pago Procesado' : 'Pendiente de pago' }}
             </p>
-            <Icon class="text-sm text-gray-500 -ms-1 h-7 w-7" name="tdesign:clear" @click="resetAllTemporalData"/>
+            <Icon class="text-sm text-gray-500 -ms-1 h-7 w-7" name="tdesign:clear" @click="resetAllTemporalData" />
           </div>
 
           <div class="flex flex-col h-full overflow-scroll">
@@ -53,24 +40,15 @@
           </div>
 
           <div class="flex justify-between items-center mt-4">
-            <UiPosOrderSummary
-              :subtotalGeneral="subtotalGeneral"
-              :ivaGeneral="ivaGeneral"
-              :subtotalReduced="subtotalReduced"
-              :ivaReduced="ivaReduced"
-              :subtotalExempt="subtotalExempt"
-              :totalIva="totalIva"
-              :total="total"
-            />
+            <UiPosOrderSummary :subtotalGeneral="subtotalGeneral" :ivaGeneral="ivaGeneral"
+              :subtotalReduced="subtotalReduced" :ivaReduced="ivaReduced" :subtotalExempt="subtotalExempt"
+              :totalIva="totalIva" :total="total" />
           </div>
 
           <div class="flex justify-end mt-4">
-            <UiPosOrderActionButtons
-              :b-paid-active="orderIsValid && !paymentIsProcessed"
-              :b-receipt-active="paymentIsProcessed"
-              @click-pay="eventClickPayment"
-              @click-receipt="eventClickReceipt"
-            />
+            <UiPosOrderActionButtons :b-paid-active="orderIsValid && !paymentIsProcessed"
+              :b-receipt-active="paymentIsProcessed" @click-pay="eventClickPayment"
+              @click-receipt="eventClickReceipt" />
           </div>
         </div>
       </div>
@@ -81,35 +59,54 @@
 <script lang="ts" setup>
 import type { Product } from '~/types/pos'
 
-// Data de productos
-const { data } = await useAsyncData('products', () => $fetch('/api/sheet-data?cached'))
-
-// Estados
-const modalPaymentIsOpen = ref(false)
-const modalReceiptIsOpen = ref(false)
-const paymentIsProcessed = ref(false)
-
-// Obtener dólar
+// Store
 const dolarStore = useMyDolarStore()
+
+dolarStore.fetchDolar()
+
+// Composables
 const { getDolar } = storeToRefs(dolarStore)
 
-onMounted(() => {
-  dolarStore.fetchDolar()
+// Data de productos
+const { data } = await useAsyncData('products', () => $fetch('/api/sheet-data?cached'), {
+  transform: (data) => {
+    return data.products.map((product: Product) => ({
+      id: product.id,
+      sku: product.sku,
+      category: product.category,
+      description: product.description,
+      p_usd: product.p_usd,
+      iva_rate: product.iva_rate,
+    }))
+  },
 })
 
-// Tipos y orden
-interface productOrder extends Product {
-  price: number
-  quantity: number
-}
+const {
+  order,
+  addProductToOrder,
+  resetOrder,
+} = usePosOrder()
 
-interface Order {
-  items: productOrder[]
-}
+// Store de sesiones de caja
+const cashStore = useCashSessionStore()
 
-const order = ref<Order>({ items: [] })
+// Obtener la sesión activa de caja
+cashStore.fetchActiveSession()
+
+// Estados UI
+const modalPaymentIsOpen = ref(false)
+const modalReceiptIsOpen = ref(false)
+const paymentProcessedData = ref<{id?: string}>({})
+
+// Reactividad
+const paymentIsProcessed = computed(() => !!paymentProcessedData.value?.id)
 
 // Cálculos del total
+const orderCalculations = useCalculateOrder(order)
+
+// Composable de pagos
+
+// Acceder a las variables desde el objeto reactivo
 const {
   subtotalGeneral,
   ivaGeneral,
@@ -118,23 +115,10 @@ const {
   subtotalExempt,
   totalIva,
   total,
-} = useCalculateOrder(order)
+  currentOrder,
+} = orderCalculations
 
-// Agregar producto a la orden
-const addProductToOrder = (product: Product) => {
-  const index = order.value.items.findIndex(item => item.sku === product.sku)
-  if (index === -1) {
-    order.value.items.push({
-      ...product,
-      quantity: 1,
-      price: parseFloat((getDolar.value * product.p_usd).toFixed(2)),
-    })
-  } else {
-    order.value.items[index].quantity++
-  }
-}
-
-// Validaciones y eventos
+// Eventos UI
 const orderIsValid = computed(() => order.value.items.length > 0)
 
 const eventClickPayment = () => {
@@ -146,42 +130,39 @@ const eventClickReceipt = () => {
   modalReceiptIsOpen.value = true
 }
 
-const paymentProcessedData = ref({})
-// Procesar pago
-const handlePaymentProcessed = async (data: any) => {
-  const { methods, total, totalPaid, change } = data
-  if (!methods) return
+const { processPayment, processReceipt } = usePosPayment()
 
-  modalPaymentIsOpen.value = false
-
-  const payment = {
-    cash_session_id: "49221efdf3986n6",
-    methods,
-    number_total: total.toFixed(2),
-    number_totalPaid: totalPaid.toFixed(2),
-    number_change: change.toFixed(2),
+// Manejo de pagos
+const handlePaymentProcessed = async (data: PaymentData) => {
+  try {
+    const result = await processPayment(data)
+    
+    if (result.success && result.paymentId) {
+      modalPaymentIsOpen.value = false
+      paymentProcessedData.value = { id: result.paymentId }
+    }
+  } catch (error) {
+    console.error('Error en procesamiento de pago:', error)
   }
+}
 
-  const { pb } = usePocketBase()
-  const result = await pb.value.collection('payments').create(payment)
-  paymentProcessedData.value = result
-  paymentIsProcessed.value = true
+// Manejo de recibos
+const eventConfirmPrint = async (dataReceipt: any) => {
+  if (!paymentProcessedData.value?.id) return
+  
+  try {
+    await processReceipt(paymentProcessedData.value.id, dataReceipt.cliente, dataReceipt)
+    resetOrder()
+    modalReceiptIsOpen.value = false
+  } catch (error) {
+    console.error('Error generando recibo:', error)
+  }
 }
 
 const resetAllTemporalData = () => {
-  // Limpiar los datos temporales
-  order.value.items = []
-  paymentIsProcessed.value = false
+  resetOrder()
   paymentProcessedData.value = {}
   modalPaymentIsOpen.value = false
-  modalReceiptIsOpen.value = false
-}
-
-const eventConfirmPrint = (dataReceipt: any) => {
-  // TODO: Enviar datos al backend de impresión de recibo
-  // Cerrar el modal
-  console.log("LA DADATA A IMPRIMIR ", dataReceipt)
-  resetAllTemporalData()
   modalReceiptIsOpen.value = false
 }
 const eventCancelPrint = () => {

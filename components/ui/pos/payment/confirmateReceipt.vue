@@ -133,7 +133,12 @@ const emit = defineEmits<{
   (e: 'confirm', payload: {
     cliente: Cliente
     items: ProductoOrden[]
-    subtotal: number
+    subtotalGeneral: number
+    ivaGeneral: number
+    subtotalReduced: number
+    ivaReduced: number
+    subtotalExempt: number
+    totalIva: number
     total: number
   }): void
 }>()
@@ -176,11 +181,14 @@ const confirmarYImprimir = () => {
   emit('confirm', {
       cliente: clienteEncontrado.value,
       items: props.order,
-      subtotal:
-        props.subtotalGeneral + props.subtotalReduced + props.subtotalExempt,
+      subtotalGeneral: props.subtotalGeneral,
+      ivaGeneral: props.ivaGeneral,
+      subtotalReduced: props.subtotalReduced,
+      ivaReduced: props.ivaReduced,
+      subtotalExempt: props.subtotalExempt,
+      totalIva: props.totalIva,
       total: props.total
   })
   resetAllTemporalData()
-  
 }
 </script>

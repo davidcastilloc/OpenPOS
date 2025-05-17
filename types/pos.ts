@@ -12,6 +12,12 @@ interface Product {
     location: string | null;
   }
 
+  interface PaymentMethod {
+    amount: number;
+    enabled: boolean;
+    type?: 'cash' | 'credit' | 'debit' | 'transfer'; // Permite "check" o cualquier otra cadena si hay otros valores posibles
+  }
+
   interface Sale {
     products: Product[];
     discount: number;
@@ -31,9 +37,26 @@ interface Product {
     total: number;
   }
 
+  export interface ProductOrder extends Product {
+    quantity: number
+  }
+  
+  export interface PosOrder {
+    items: ProductOrder[]
+  }
+
+  interface ResponseApiProducts {
+    success: boolean
+    cached: boolean
+    updated: string
+    products: Product[]
+  }
+
   export type {
     Product,
     Sale,
     Order,
-    SaleTotals
+    SaleTotals,
+    ResponseApiProducts,
+    PaymentMethod
   }

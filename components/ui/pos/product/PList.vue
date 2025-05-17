@@ -20,7 +20,7 @@
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
             <th class="px-6 py-3">Descripcion</th>
-            <th class="px-6 py-3">Unidad</th>
+            <th class="px-6 py-3">Categoria</th>
             <th class="px-6 py-3">Precio</th>
             <th class="px-6 py-3"></th>
           </tr>
@@ -32,8 +32,8 @@
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
           >
             <td class="px-6 py-4">{{ product.description }}</td>
-            <td class="px-6 py-4">{{ product.unit }}</td>
-            <td class="px-6 py-4">Bs {{ product.p_bs }}</td>
+            <td class="px-6 py-4">{{ product.category }}</td>
+            <td class="px-6 py-4">Bs {{ (product.p_usd * rate ).toFixed(2) }}</td>
             <td >
               <BaseButton @click="emits('add-product', product)">
                 <Icon name="ic:outline-add" />
@@ -48,7 +48,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 
-const props = defineProps({ products: Array });
+const props = defineProps({ products: Array, rate: Number });
 const emits = defineEmits(['add-product']);
 
 const searchTerm = ref('');
@@ -112,23 +112,13 @@ const handleEnter = () => {
   }
 };
 
-// set focus to input on mount and searchTerm change and after 100ms of inactivity
-watch(searchTerm, () => {
-  setTimeout(() => {
-    const input = document.querySelector('input');
-    if (input) {
-      input.focus();
-    }
-  }, 100);
-})
-
-onMounted(() => {
-  setTimeout(() => {
-    const input = document.querySelector('input');
-    if (input) {
-      input.focus();
-    }
-  }, 100);
-});
+// Si solo hay un producto en la lista, agrega automáticamente
+watch(filteredProducts, (newVal) => {
+  if (newVal.length === 1) {
+    emits('add-product', newVal[0]);
+    searchTerm.value = ''; // Limpia el input si deseas
+    filteredProducts.value = props.products; // Reinicia la lista
+  }
+}, { deep: true })
 
 </script>
