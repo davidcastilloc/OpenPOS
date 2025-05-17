@@ -17,12 +17,10 @@ export interface PaymentResult {
 export const usePosPayment = () => {
   const { pb } = usePocketBase()
   const notification = useNotification()
-  const cashierIdSession = useCashSessionStore().activeSession?.id
-  
   const processPayment = async (data: PaymentData): Promise<PaymentResult> => {
     try {
       const payment = {
-        cash_session_id: cashierIdSession,
+        cash_session_id: useCashSessionStore().getActiveSessionId,
         methods: data.methods,
         number_total: data.total.toFixed(2),
         number_totalPaid: data.totalPaid.toFixed(2),
@@ -40,7 +38,7 @@ export const usePosPayment = () => {
   const processReceipt = async (paymentId: string, clientData: any, dataReceipt: any) => {
     try {
       const data = {
-        cash_session_id: cashierIdSession,
+        cash_session_id: useCashSessionStore().getActiveSessionId,
         payment_id: paymentId,
         client_data: clientData,
         json_data: dataReceipt,

@@ -1,8 +1,6 @@
-import type { Product, PosOrder, ProductOrder } from '~/types/pos'
+import type { PosOrder, ProductOrder } from '~/types/pos'
 import { storeToRefs } from 'pinia'
 import { useMyDolarStore } from '~/stores/dolar'
-
-
 
 export const usePosOrder = () => {
   const order = ref<PosOrder>({ items: [] })
@@ -25,7 +23,7 @@ export const usePosOrder = () => {
       order.value.items.push({
         ...product,
         quantity: 1,
-        p_bs:  getDolar.value * product.p_usd ,
+        p_bs: Number((getDolar.value * product.p_usd).toFixed(2)),
       })
     } else {
       order.value.items[index].quantity++

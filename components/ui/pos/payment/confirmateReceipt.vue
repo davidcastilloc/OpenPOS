@@ -8,25 +8,19 @@
 
       <div class="flex flex-col gap-2">
         <label for="cedula" class="text-sm font-medium">Cédula o RIF</label>
-        <BaseInput
-          id="cedula"
-          v-model="cedulaBusqueda"
-          @keyup.enter="buscarCliente"
-          type="text"
-          placeholder="Ej: V-12345678"
-          class=" w-full"
-        />
+        <BaseInput id="cedula" v-model="cedulaBusqueda" @keyup.enter="buscarCliente" type="text"
+          placeholder="Ej: V-12345678" class=" w-full" />
 
         <div v-if="clienteEncontrado" class="text-sm text-success">
           <div class="grid grid-cols-2 gap-2">
-            <span class="text-sm"><strong>Nacionalidad:</strong> {{clienteEncontrado.nacionalidad}}</span>
+            <span class="text-sm"><strong>Nacionalidad:</strong> {{ clienteEncontrado.nacionalidad }}</span>
             <span class="text-sm"><strong>Cédula:</strong> {{ clienteEncontrado.cedula }}</span>
             <span class="text-sm"><strong>RIF:</strong> {{ clienteEncontrado.rif }}</span>
             <span class="text-sm"><strong>Fecha Nac.:</strong> {{ clienteEncontrado.fecha_nac }}</span>
             <span class="text-sm"><strong>Primer Nombre:</strong> {{ clienteEncontrado.primer_nombre }}</span>
             <span class="text-sm"><strong>Segundo Nombre:</strong> {{ clienteEncontrado.segundo_nombre }}</span>
             <span class="text-sm"><strong>Primer Apellido:</strong> {{ clienteEncontrado.primer_apellido }}</span>
-            <span class="text-sm"><strong>Segundo Apellido:</strong> {{ clienteEncontrado.segundo_apellido}}</span>
+            <span class="text-sm"><strong>Segundo Apellido:</strong> {{ clienteEncontrado.segundo_apellido }}</span>
           </div>
         </div>
         <div v-else-if="cedulaBusqueda.length > 0" class="text-sm text-destructive">
@@ -42,73 +36,41 @@
       </div>
       <div class="space-y-2 max-h-72 overflow-y-auto">
         <!-- renderizar tabla con la lista de productos-->
-        <!-- v-for="producto in order" :key="producto.sku" --> 
         <div class="border-b flex justify-between" v-for="producto in order" :key="producto.sku">
           <div>
             <div class="font-medium">{{ producto.description }}</div>
-            <div class="text-sm text-gray-500">Bs {{ producto.price }} x {{ producto.quantity }}</div>
+            <div class="text-sm text-gray-500">Bs {{ producto.p_bs }} x {{ producto.quantity }}</div>
           </div>
           <div class="flex items-center pr-3">
-            <span class="font-medium">Bs {{ (producto.price * producto.quantity).toFixed(2) }}</span>
+            <span class="font-medium">Bs {{ (producto.p_bs * producto.quantity).toFixed(2) }}</span>
           </div>
         </div>
       </div>
       <div>
-        <UiPosOrderSummary
-          :subtotalGeneral="subtotalGeneral"
-          :ivaGeneral="ivaGeneral"
-          :subtotalReduced="subtotalReduced"
-          :ivaReduced="ivaReduced"
-          :subtotalExempt="subtotalExempt"
-          :totalIva="totalIva"
-          :total="total"
-        />
+        <UiPosOrderSummary :subtotalGeneral="subtotalGeneral" :ivaGeneral="ivaGeneral"
+          :subtotalReduced="subtotalReduced" :ivaReduced="ivaReduced" :subtotalExempt="subtotalExempt"
+          :totalIva="totalIva" :total="total" />
       </div>
     </div>
 
     <!-- Botones -->
     <div class="flex justify-end gap-4">
-      <BaseButton @click="cancelar" variant="destructive" >
+      <BaseButton @click="cancelar" variant="destructive">
         Cancelar
       </BaseButton>
-      <BaseButton
-        variant="primary" 
-        :disabled="!clienteEncontrado"
-        @click="confirmarYImprimir"
-      >
+      <BaseButton variant="primary" :disabled="!clienteEncontrado" @click="confirmarYImprimir">
         Confirmar e Imprimir.
-      </BaseButton >
+      </BaseButton>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-
-interface Producto {
-  sku: string
-  description: string
-}
-
-interface ProductoOrden extends Producto {
-  price: number
-  quantity: number
-}
-
-interface Cliente {
-  nacionalidad: string
-  cedula: number
-  fecha_nac: string
-  rif: string
-  primer_apellido: string
-  segundo_apellido: string
-  primer_nombre: string
-  segundo_nombre: string
-  request_date: string
-}
+import type { ProductOrder, Cliente } from '~/types/pos'
 
 // Props
 const props = withDefaults(defineProps<{
-  order: ProductoOrden[]
+  order: ProductOrder[]
   subtotalGeneral: number
   ivaGeneral: number
   subtotalReduced: number
@@ -132,7 +94,7 @@ const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'confirm', payload: {
     cliente: Cliente
-    items: ProductoOrden[]
+    items: ProductOrder[]
     subtotalGeneral: number
     ivaGeneral: number
     subtotalReduced: number
@@ -179,15 +141,15 @@ const confirmarYImprimir = () => {
     return
   }
   emit('confirm', {
-      cliente: clienteEncontrado.value,
-      items: props.order,
-      subtotalGeneral: props.subtotalGeneral,
-      ivaGeneral: props.ivaGeneral,
-      subtotalReduced: props.subtotalReduced,
-      ivaReduced: props.ivaReduced,
-      subtotalExempt: props.subtotalExempt,
-      totalIva: props.totalIva,
-      total: props.total
+    cliente: clienteEncontrado.value,
+    items: props.order,
+    subtotalGeneral: props.subtotalGeneral,
+    ivaGeneral: props.ivaGeneral,
+    subtotalReduced: props.subtotalReduced,
+    ivaReduced: props.ivaReduced,
+    subtotalExempt: props.subtotalExempt,
+    totalIva: props.totalIva,
+    total: props.total
   })
   resetAllTemporalData()
 }

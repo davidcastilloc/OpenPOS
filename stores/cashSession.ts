@@ -11,6 +11,8 @@ export const useCashSessionStore = defineStore('cashSession', () => {
 
   const isSessionOpen = computed(() => !!activeSession.value && activeSession.value.status)
 
+  const getActiveSessionId = computed(() => activeSession.value?.id)
+
   // 📥 Verifica si ya hay una sesión abierta
   async function fetchActiveSession() {
     loading.value = true
@@ -78,6 +80,7 @@ export const useCashSessionStore = defineStore('cashSession', () => {
   }
 
   return {
+    getActiveSessionId,
     activeSession,
     isSessionOpen,
     loading,

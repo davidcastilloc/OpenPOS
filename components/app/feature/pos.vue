@@ -90,21 +90,19 @@ const {
 // Store de sesiones de caja
 const cashStore = useCashSessionStore()
 
-// Obtener la sesión activa de caja
-cashStore.fetchActiveSession()
+await useAsyncData('cash-session', () =>  cashStore.fetchActiveSession())
+
 
 // Estados UI
 const modalPaymentIsOpen = ref(false)
 const modalReceiptIsOpen = ref(false)
-const paymentProcessedData = ref<{id?: string}>({})
+const paymentProcessedData = ref<{ id?: string }>({})
 
 // Reactividad
 const paymentIsProcessed = computed(() => !!paymentProcessedData.value?.id)
 
 // Cálculos del total
 const orderCalculations = useCalculateOrder(order)
-
-// Composable de pagos
 
 // Acceder a las variables desde el objeto reactivo
 const {
@@ -115,7 +113,6 @@ const {
   subtotalExempt,
   totalIva,
   total,
-  currentOrder,
 } = orderCalculations
 
 // Eventos UI
@@ -136,7 +133,7 @@ const { processPayment, processReceipt } = usePosPayment()
 const handlePaymentProcessed = async (data: PaymentData) => {
   try {
     const result = await processPayment(data)
-    
+
     if (result.success && result.paymentId) {
       modalPaymentIsOpen.value = false
       paymentProcessedData.value = { id: result.paymentId }
@@ -149,10 +146,10 @@ const handlePaymentProcessed = async (data: PaymentData) => {
 // Manejo de recibos
 const eventConfirmPrint = async (dataReceipt: any) => {
   if (!paymentProcessedData.value?.id) return
-  
+
   try {
     await processReceipt(paymentProcessedData.value.id, dataReceipt.cliente, dataReceipt)
-    resetOrder()
+    resetAllTemporalData()
     modalReceiptIsOpen.value = false
   } catch (error) {
     console.error('Error generando recibo:', error)
