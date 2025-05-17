@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Product } from '~/types/pos'
+import type { Product, ReceiptData } from '~/types/pos'
 
 // Store
 const dolarStore = useMyDolarStore()
@@ -144,7 +144,7 @@ const handlePaymentProcessed = async (data: PaymentData) => {
 }
 
 // Manejo de recibos
-const eventConfirmPrint = async (dataReceipt: any) => {
+const eventConfirmPrint = async (dataReceipt: ReceiptData) => {
   if (!paymentProcessedData.value?.id) return
 
   try {

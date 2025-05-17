@@ -12,6 +12,18 @@ interface Product {
   location: string | null;
 }
 
+interface ReceiptData {
+  cliente: Cliente
+  items: ProductOrder[]
+  subtotalGeneral: number
+  ivaGeneral: number
+  subtotalReduced: number
+  ivaReduced: number
+  subtotalExempt: number
+  totalIva: number
+  total: number
+}
+
 interface Cliente {
   nacionalidad: string
   cedula: number
@@ -72,4 +84,5 @@ export type {
   ResponseApiProducts,
   PaymentMethod,
   Cliente,
+  ReceiptData
 }

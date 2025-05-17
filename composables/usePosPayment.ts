@@ -1,5 +1,6 @@
-import type { PaymentMethod } from '~/types/pos'
+import type { Cliente, PaymentMethod, ReceiptData } from '~/types/pos'
 import { useNotification } from '~/stores/notification'
+import type { TicketPayload } from '~/types/TPrinter'
 
 export interface PaymentData {
   methods: PaymentMethod
@@ -35,7 +36,18 @@ export const usePosPayment = () => {
     }
   }
 
-  const processReceipt = async (paymentId: string, clientData: any, dataReceipt: any) => {
+  const sendToPrinterServer = async (data: TicketPayload) => {
+      const response = await $fetch('/api/printer/print', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      return response
+  }
+
+  const processReceipt = async (paymentId: string, clientData: Cliente, dataReceipt: ReceiptData) => {
     try {
       const data = {
         cash_session_id: useCashSessionStore().getActiveSessionId,
@@ -43,7 +55,26 @@ export const usePosPayment = () => {
         client_data: clientData,
         json_data: dataReceipt,
       }
-      await pb.collection('receipts').create(data)
+      const receipt = await pb.collection('receipts').create(data)
+      await sendToPrinterServer(
+        {
+          items: dataReceipt.items,
+          total: dataReceipt.total,
+          empresa: 'Viveres Milenium 2609, C.A',
+          direccion: 'Mercado Municipal de Penialver',
+          rif: 'J-123123132',
+          telefono: '1423123123',
+          subtotalGeneral: dataReceipt.subtotalGeneral,
+          subtotalReduced: dataReceipt.subtotalReduced,
+          subtotalExempt: dataReceipt.subtotalExempt,
+          ivaGeneral: dataReceipt.ivaGeneral,
+          ivaReduced: dataReceipt.ivaReduced,
+          totalIva: dataReceipt.totalIva,
+          numero_control: receipt.id,
+          cliente: clientData
+        }
+      )
+    
       return { success: true }
     } catch (error) {
       notification.showError('Error generando recibo')
@@ -51,5 +82,5 @@ export const usePosPayment = () => {
     }
   }
 
-  return { processPayment, processReceipt }
+  return { processPayment, processReceipt, sendToPrinterServer }
 }

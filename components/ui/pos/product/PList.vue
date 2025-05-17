@@ -4,11 +4,12 @@
     <div class="col-span-2">
       <div class="flex items-center">
         <BaseInput
+          ref="searchInputRef"
           type="text"
           class="w-full"
           placeholder="SKU / Barcode"
           v-model="searchTerm"
-          @keydown.enter="handleEnter"
+          @keyup.enter="handleEnter"
           tabindex="1"
         />
       </div>
@@ -33,9 +34,9 @@
           >
             <td class="px-6 py-4">{{ product.description }}</td>
             <td class="px-6 py-4">{{ product.category }}</td>
-            <td class="px-6 py-4">Bs {{ (product.p_usd * rate ).toFixed(2) }}</td>
-            <td >
-              <BaseButton @click="emits('add-product', product)">
+            <td class="px-6 py-4">Bs {{ (product.p_usd * rate).toFixed(2) }}</td>
+            <td>
+              <BaseButton @click="() => addProduct(product)">
                 <Icon name="ic:outline-add" />
               </BaseButton>
             </td>
@@ -45,43 +46,62 @@
     </div>
   </div>
 </template>
-<script setup>
-import { ref, watch } from 'vue';
 
-const props = defineProps({ products: Array, rate: Number });
+<script setup>
+import { ref, watch, nextTick } from 'vue';
+
+const props = defineProps({
+  products: Array,
+  rate: Number,
+});
+
 const emits = defineEmits(['add-product']);
 
 const searchTerm = ref('');
 const filteredProducts = ref([]);
+const isSearching = ref(false);
+const searchInputRef = ref(null);
 
-// Identifica si la búsqueda parece venir de un lector de código de barras
+// Enfocar input cuando se agrega un producto
+const focusInput = () => {
+  nextTick(() => {
+    searchInputRef.value?.focus();
+  });
+};
+
+// Validar si el término parece un código de barras
 const isBarcodeSearch = (value) => /^\d{8,}$/.test(value.trim());
 
-// Ejecuta la búsqueda con lógica separada
+// Búsqueda real de productos
 const performSearch = (value) => {
+  isSearching.value = true;
+
   const term = value.trim().toLowerCase();
 
   if (!term) {
     filteredProducts.value = props.products;
+    isSearching.value = false;
     return;
   }
 
   if (isBarcodeSearch(term)) {
-    // Buscar solo en productos con SKU válido
     filteredProducts.value = props.products.filter(p =>
       p.sku && p.sku !== '0' && p.sku !== 0 &&
       String(p.sku).toLowerCase().includes(term)
     );
   } else {
-    // Buscar por descripción en todos los productos
     filteredProducts.value = props.products.filter(p =>
       p.description?.toLowerCase().includes(term)
     );
   }
+
+  setTimeout(() => {
+    isSearching.value = false;
+  }, 100);
 };
 
-// Debounce para evitar búsqueda excesiva
-const debounce = (fn, delay = 400) => {
+// Debounce para evitar llamadas excesivas
+const debounce = (fn, delay = 300) => {
   let timer;
   return (...args) => {
     clearTimeout(timer);
@@ -91,34 +111,47 @@ const debounce = (fn, delay = 400) => {
 
 const debouncedSearch = debounce(performSearch, 300);
 
-// Reacción al input del usuario
 watch(searchTerm, (newVal) => {
   debouncedSearch(newVal);
 });
 
-// Mostrar todos los productos por defecto
 filteredProducts.value = props.products;
 
-const handleEnter = () => {
-  const term = searchTerm.value.trim().toLowerCase();
-
-  if (!term || !isBarcodeSearch(term)) return;
-
-  const matchingProduct = filteredProducts.value[0];
-  if (matchingProduct) {
-    emits('add-product', matchingProduct);
-    searchTerm.value = ''; // Limpia el input si deseas
-    filteredProducts.value = props.products; // Reinicia la lista
-  }
+// Agregar producto y limpiar
+const addProduct = (product) => {
+  emits('add-product', product);
+  searchTerm.value = '';
+  filteredProducts.value = props.products;
+  focusInput();
 };
 
-// Si solo hay un producto en la lista, agrega automáticamente
-watch(filteredProducts, (newVal) => {
-  if (newVal.length === 1) {
-    emits('add-product', newVal[0]);
-    searchTerm.value = ''; // Limpia el input si deseas
-    filteredProducts.value = props.products; // Reinicia la lista
-  }
-}, { deep: true })
+const findProductBySku = (sku) => {
+ return props.products.find(p => p.sku === Number(sku));
+};
 
+// Enter manual (ej. escáner)
+const handleEnter = () => {
+  const term = searchTerm.value.trim();
+  if (isSearching.value) return;
+  if (!term || !isBarcodeSearch(term)) return;
+  // Buscar en la lista de productos props.products el sku
+  const matchingProduct = findProductBySku(term);
+  addProduct(matchingProduct);
+  filteredProducts.value = props.products;
+  focusInput();
+  console.log('SCANEADO')
+};
+
+// Autoagrega solo si no estamos buscando
+watch(
+  filteredProducts,
+  (newVal) => {
+    if (isSearching.value) return;
+
+    if (newVal.length === 1) {
+      addProduct(newVal[0]);
+    }
+  },
+  { deep: true }
+);
 </script>

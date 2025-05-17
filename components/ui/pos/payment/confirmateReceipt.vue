@@ -67,7 +67,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { ProductOrder, Cliente } from '~/types/pos'
+import type { ProductOrder, Cliente, ReceiptData } from '~/types/pos'
+
+
 
 // Props
 const props = withDefaults(defineProps<{
@@ -93,17 +95,7 @@ const props = withDefaults(defineProps<{
 // Emits
 const emit = defineEmits<{
   (e: 'cancel'): void
-  (e: 'confirm', payload: {
-    cliente: Cliente
-    items: ProductOrder[]
-    subtotalGeneral: number
-    ivaGeneral: number
-    subtotalReduced: number
-    ivaReduced: number
-    subtotalExempt: number
-    totalIva: number
-    total: number
-  }): void
+  (e: 'confirm', payload: ReceiptData ): void
 }>()
 
 // Estado de búsqueda

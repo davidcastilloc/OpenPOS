@@ -4,15 +4,21 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'node',   // para que se ejecute en un proceso Node.js normal
     routeRules: {
-      '/api/pocketbase/**': { proxy: { to: 'http://localhost:8090/**' } } // Example: proxy /api/** to localhost:3000/api/**
+      '/api/pocketbase/**': {
+        proxy: { to: 'http://localhost:8090/**' }
+      },
+      '/api/printer/**': {
+        // ROUTE TO PRINTER SERVER FLASK
+        proxy: { to: 'http://localhost:5000/**' }
+      }
     }
   },
   devtools: { enabled: true },
-    modules: [
-      '@shuriken-ui/nuxt',
-      '@pinia/nuxt'
-    ],
-    css: [
-      '~/assets/css/main.css',
-    ],
+  modules: [
+    '@shuriken-ui/nuxt',
+    '@pinia/nuxt'
+  ],
+  css: [
+    '~/assets/css/main.css',
+  ],
 })
