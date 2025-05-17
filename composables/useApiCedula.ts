@@ -1,7 +1,7 @@
 // https://api.cedula.com.ve/api/v1?app_id=990+&token=0f2ef4b5e34c35f23272caf3f3c33fb3&cedula=24980047
+import { ref } from 'vue'
 
-
-export const useUseApiCedula = () => {
+export const useApiCedula = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   const data = ref<any>(null)

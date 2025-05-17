@@ -45,7 +45,7 @@
               :class="paymentIsProcessed ? 'text-green-400' : 'text-red-400'">
               {{ paymentIsProcessed ? 'Pago Procesado' : 'Pendiente de pago' }}
             </p>
-            <Icon class="text-sm text-gray-500 -ms-1 h-7 w-7" name="tdesign:clear" />
+            <Icon class="text-sm text-gray-500 -ms-1 h-7 w-7" name="tdesign:clear" @click="resetAllTemporalData"/>
           </div>
 
           <div class="flex flex-col h-full overflow-scroll">
@@ -67,6 +67,7 @@
           <div class="flex justify-end mt-4">
             <UiPosOrderActionButtons
               :b-paid-active="orderIsValid && !paymentIsProcessed"
+              :b-receipt-active="paymentIsProcessed"
               @click-pay="eventClickPayment"
               @click-receipt="eventClickReceipt"
             />
@@ -167,13 +168,25 @@ const handlePaymentProcessed = async (data: any) => {
   paymentIsProcessed.value = true
 }
 
-const eventConfirmPrint = () => {
+const resetAllTemporalData = () => {
+  // Limpiar los datos temporales
+  order.value.items = []
+  paymentIsProcessed.value = false
+  paymentProcessedData.value = {}
+  modalPaymentIsOpen.value = false
+  modalReceiptIsOpen.value = false
+}
+
+const eventConfirmPrint = (dataReceipt: any) => {
   // TODO: Enviar datos al backend de impresión de recibo
   // Cerrar el modal
+  console.log("LA DADATA A IMPRIMIR ", dataReceipt)
+  resetAllTemporalData()
   modalReceiptIsOpen.value = false
 }
 const eventCancelPrint = () => {
   // Cerrar el modal
+  console.log("CANCELAR")
   modalReceiptIsOpen.value = false
 }
 

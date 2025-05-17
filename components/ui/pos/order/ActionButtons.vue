@@ -4,7 +4,7 @@
       <Icon class="-ms-1 h-4 w-4" name="hugeicons:payment-02" />
       <span>Pago</span>
     </BaseButton>
-    <BaseButton variant="primary" @click="receipt"  >
+    <BaseButton variant="primary" @click="receipt" :disabled="!bReceiptActive" >
       <Icon class="-ms-1 h-4 w-4" name="streamline:receipt" />
       <span>Recibo</span>
     </BaseButton>

@@ -11,14 +11,23 @@
         <BaseInput
           id="cedula"
           v-model="cedulaBusqueda"
-          @input="buscarCliente"
+          @keyup.enter="buscarCliente"
           type="text"
           placeholder="Ej: V-12345678"
           class=" w-full"
         />
 
         <div v-if="clienteEncontrado" class="text-sm text-success">
-          <span class="font-semibold">Nombre: </span>{{ clienteEncontrado.name }}
+          <div class="grid grid-cols-2 gap-2">
+            <span class="text-sm"><strong>Nacionalidad:</strong> {{clienteEncontrado.nacionalidad}}</span>
+            <span class="text-sm"><strong>Cédula:</strong> {{ clienteEncontrado.cedula }}</span>
+            <span class="text-sm"><strong>RIF:</strong> {{ clienteEncontrado.rif }}</span>
+            <span class="text-sm"><strong>Fecha Nac.:</strong> {{ clienteEncontrado.fecha_nac }}</span>
+            <span class="text-sm"><strong>Primer Nombre:</strong> {{ clienteEncontrado.primer_nombre }}</span>
+            <span class="text-sm"><strong>Segundo Nombre:</strong> {{ clienteEncontrado.segundo_nombre }}</span>
+            <span class="text-sm"><strong>Primer Apellido:</strong> {{ clienteEncontrado.primer_apellido }}</span>
+            <span class="text-sm"><strong>Segundo Apellido:</strong> {{ clienteEncontrado.segundo_apellido}}</span>
+          </div>
         </div>
         <div v-else-if="cedulaBusqueda.length > 0" class="text-sm text-destructive">
           {{ mensajeError }}
@@ -86,8 +95,15 @@ interface ProductoOrden extends Producto {
 }
 
 interface Cliente {
-  id: string
-  name: string
+  nacionalidad: string
+  cedula: number
+  fecha_nac: string
+  rif: string
+  primer_apellido: string
+  segundo_apellido: string
+  primer_nombre: string
+  segundo_nombre: string
+  request_date: string
 }
 
 // Props
@@ -122,26 +138,19 @@ const emit = defineEmits<{
   }): void
 }>()
 
-
-// Base de datos simulada de clientes (contexto Venezuela)
-const clientesSimulados = ref<Cliente[]>([
-  { id: 'V-12345678', name: 'Carlos Pérez' },
-  { id: 'J-87654321', name: 'Ferretería El Tornillo' },
-  { id: 'V-11223344', name: 'Ana María Rodríguez' },
-])
-
 // Estado de búsqueda
 const cedulaBusqueda = ref('')
 const clienteEncontrado = ref<Cliente | null>(null)
 const mensajeError = ref('')
 
 // Métodos
-const buscarCliente = () => {
+const buscarCliente = async () => {
+  console.log('Buscando cliente...')
   const cedula = cedulaBusqueda.value.trim().toUpperCase()
-  const cliente = clientesSimulados.value.find(c => c.id === cedula)
+  const { data } = await useFetch<Cliente | null>(`/api/client/${cedula}`)
 
-  if (cliente) {
-    clienteEncontrado.value = cliente
+  if (data) {
+    clienteEncontrado.value = data.value
     mensajeError.value = ''
   } else {
     clienteEncontrado.value = null
@@ -153,15 +162,25 @@ const cancelar = () => {
   emit('cancel')
 }
 
+const resetAllTemporalData = () => {
+  cedulaBusqueda.value = ''
+  clienteEncontrado.value = null
+  mensajeError.value = ''
+}
+
 const confirmarYImprimir = () => {
-  if (clienteEncontrado.value) {
-    emit('confirm', {
+  if (!clienteEncontrado.value) {
+    console.log('No se encontró el cliente', clienteEncontrado.value)
+    return
+  }
+  emit('confirm', {
       cliente: clienteEncontrado.value,
       items: props.order,
       subtotal:
         props.subtotalGeneral + props.subtotalReduced + props.subtotalExempt,
       total: props.total
-    })
-  }
+  })
+  resetAllTemporalData()
+  
 }
 </script>
