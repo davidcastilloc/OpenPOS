@@ -3,12 +3,12 @@
     <UiPosLayoutSidebar />
 
     <!-- Modales Globales -->
-    <UiPosLayoutUiModal v-show="modalPaymentIsOpen"
+    <UiPosLayoutUiModal v-show="modalPaymentIsOpen" @modal:close="modalPaymentIsOpen = false"
       class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg z-50 w-1/2">
       <UiPosPaymentModalContent :total="total" :dolar-rate="getDolar" @payment-processed="handlePaymentProcessed" />
     </UiPosLayoutUiModal>
 
-    <UiPosLayoutUiModal v-show="modalReceiptIsOpen"
+    <UiPosLayoutUiModal v-show="modalReceiptIsOpen" @modal:close="modalReceiptIsOpen = false"
       class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg z-50 w-1/2">
       <UiPosPaymentConfirmateReceipt :order="order.items" :subtotalGeneral="subtotalGeneral" :ivaGeneral="ivaGeneral"
         :subtotalReduced="subtotalReduced" :ivaReduced="ivaReduced" :subtotalExempt="subtotalExempt"

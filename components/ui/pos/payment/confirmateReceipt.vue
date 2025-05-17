@@ -1,18 +1,24 @@
 <template>
-  <div class="max-w-3xl mx-auto p-6 space-y-6">
-    <h2 class="text-2xl font-bold text-center text-primary">Confirmar Detalles del Recibo</h2>
-
+  <div class="max-w-3xl mx-auto space-y-2">
+    <p class="font-bold text-center text-primary">Confirmar Detalles del Recibo</p>
     <!-- Información del Cliente -->
-    <div class="border border-default rounded-xl p-4 space-y-4 ">
-      <h3 class="text-lg font-semibold text-muted">Información del Cliente</h3>
-
-      <div class="flex flex-col gap-2">
+    <div class="border border-default rounded-xl p-2 space-y-4">
+      <p class="font-semibold text-muted">Información del Cliente</p>
+      <div class="flex flex-col">
         <label for="cedula" class="text-sm font-medium">Cédula o RIF</label>
         <BaseInput id="cedula" v-model="cedulaBusqueda" @keyup.enter="buscarCliente" type="text"
-          placeholder="Ej: V-12345678" class=" w-full" />
-
-        <div v-if="clienteEncontrado" class="text-sm text-success">
-          <div class="grid grid-cols-2 gap-2">
+          placeholder="Ej: V-12345678" class="w-full" tabindex="1" >
+        </BaseInput>
+        <!-- Progress Circle centered -->
+         <div class="flex justify-center items-center">
+          <BaseProgressCircle
+            v-if="loading"
+            title="Cargando clientes"
+          />
+         </div>
+        <!-- Resultado de la búsqueda -->
+        <div v-if="clienteEncontrado && !loading" class="text-sm text-success">
+          <div class="grid grid-cols-2 ">
             <span class="text-sm"><strong>Nacionalidad:</strong> {{ clienteEncontrado.nacionalidad }}</span>
             <span class="text-sm"><strong>Cédula:</strong> {{ clienteEncontrado.cedula }}</span>
             <span class="text-sm"><strong>RIF:</strong> {{ clienteEncontrado.rif }}</span>
@@ -28,18 +34,14 @@
         </div>
       </div>
     </div>
-
     <!-- Detalles del Recibo -->
-    <div class=" border border-default rounded-xl p-4 space-y-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold">Recibo</h2>
-      </div>
+    <div class="w-full border border-default rounded-xl p-4 space-y-4">
       <div class="space-y-2 max-h-72 overflow-y-auto">
         <!-- renderizar tabla con la lista de productos-->
-        <div class="border-b flex justify-between" v-for="producto in order" :key="producto.sku">
+        <div class="border-b flex justify-between text-sm" v-for="producto in order" :key="producto.sku">
           <div>
             <div class="font-medium">{{ producto.description }}</div>
-            <div class="text-sm text-gray-500">Bs {{ producto.p_bs }} x {{ producto.quantity }}</div>
+            <div class="text-xs text-gray-500">Bs {{ producto.p_bs }} x {{ producto.quantity }}</div>
           </div>
           <div class="flex items-center pr-3">
             <span class="font-medium">Bs {{ (producto.p_bs * producto.quantity).toFixed(2) }}</span>
@@ -52,7 +54,6 @@
           :totalIva="totalIva" :total="total" />
       </div>
     </div>
-
     <!-- Botones -->
     <div class="flex justify-end gap-4">
       <BaseButton @click="cancelar" variant="destructive">
@@ -109,13 +110,15 @@ const emit = defineEmits<{
 const cedulaBusqueda = ref('')
 const clienteEncontrado = ref<Cliente | null>(null)
 const mensajeError = ref('')
-
 // Métodos
+
+const loading = ref(false)
+
 const buscarCliente = async () => {
   console.log('Buscando cliente...')
+  loading.value = true
   const cedula = cedulaBusqueda.value.trim().toUpperCase()
   const { data } = await useFetch<Cliente | null>(`/api/client/${cedula}`)
-
   if (data) {
     clienteEncontrado.value = data.value
     mensajeError.value = ''
@@ -123,6 +126,7 @@ const buscarCliente = async () => {
     clienteEncontrado.value = null
     mensajeError.value = 'Cliente no encontrado'
   }
+  loading.value = false
 }
 
 const cancelar = () => {

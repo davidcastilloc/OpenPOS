@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-3 text-sm max-w-md">
+  <div class="text-sm">
     <!-- Header -->
     <div class="flex justify-between items-center">
       <h3 class="text-base font-semibold">Detalles de Pago</h3>
@@ -101,14 +101,21 @@ const formatCurrency = (amount: number, currency: 'VES' | 'USD') =>
     currency
   }).format(amount)
 
+const resetAllInputs = () => {
+  Object.values(paymentMethods.value).forEach(method => {
+    method.amount = 0
+    method.enabled = false
+  })
+}
+
 const processPayment = () => {
   if (!isPaymentValid.value) return
-
   emit('payment-processed', {
     methods: paymentMethods.value,
     total: props.total,
     totalPaid: totalPaid.value,
     change: change.value
   })
+  resetAllInputs()
 }
 </script>
