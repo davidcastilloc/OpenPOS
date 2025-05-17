@@ -68,7 +68,7 @@ dolarStore.fetchDolar()
 const { getDolar } = storeToRefs(dolarStore)
 
 // Data de productos
-const { data } = await useAsyncData('products', () => $fetch('/api/sheet-data?cached'), {
+const { data } = await useAsyncData('products', () => $fetch('/api/sheet-data'), {
   transform: (data) => {
     return data.products.map((product: Product) => ({
       id: product.id,
