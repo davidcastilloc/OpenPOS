@@ -1,5 +1,7 @@
 export default defineEventHandler(async (event) => {
-  const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFRtIyMqDBx-AjNGGXuamUcD-hguFU4ZSmUfSLBevxgr3JWxECCBiV6jc41pe1KBn4E8X821guf6Qp/pub?output=csv'
+  // get google_sheets_csv from .env
+  const { google_sheets_csv } = import.meta.env
+  const csvUrl = google_sheets_csv
   const cacheKey = 'sheet-data'
   const cacheDuration = 60 * 60 * 4 // 4 horas
 

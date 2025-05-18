@@ -1,12 +1,12 @@
 <template>
   <div class="grid grid-cols-2 gap-4">
-    <!-- Input de búsqueda -->
     <div class="col-span-2">
       <div class="flex items-center">
         <BaseInput
           ref="searchInputRef"
+          id="sku"
           type="text"
-          class="w-full"
+          class="w-full z-50"
           placeholder="SKU / Barcode"
           v-model="searchTerm"
           @keyup.enter="handleEnter"
@@ -15,7 +15,6 @@
       </div>
     </div>
 
-    <!-- Tabla de productos filtrados -->
     <div class="col-span-2">
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -61,11 +60,13 @@ const searchTerm = ref('');
 const filteredProducts = ref([]);
 const isSearching = ref(false);
 const searchInputRef = ref(null);
+const inactivityTimeout = ref(null);
+const inactivityTime = 5000; // Tiempo de inactividad en milisegundos (ej: 5 segundos)
 
-// Enfocar input cuando se agrega un producto
+// Enfocar input
 const focusInput = () => {
   nextTick(() => {
-    searchInputRef.value?.focus();
+    document.getElementById('sku').focus()
   });
 };
 
@@ -113,6 +114,7 @@ const debouncedSearch = debounce(performSearch, 300);
 
 watch(searchTerm, (newVal) => {
   debouncedSearch(newVal);
+  resetInactivityTimer(); // Reiniciar el timer al escribir
 });
 
 filteredProducts.value = props.products;
@@ -123,6 +125,7 @@ const addProduct = (product) => {
   searchTerm.value = '';
   filteredProducts.value = props.products;
   focusInput();
+  resetInactivityTimer(); // Reiniciar el timer al agregar producto
 };
 
 const findProductBySku = (sku) => {
@@ -136,10 +139,13 @@ const handleEnter = () => {
   if (!term || !isBarcodeSearch(term)) return;
   // Buscar en la lista de productos props.products el sku
   const matchingProduct = findProductBySku(term);
-  addProduct(matchingProduct);
-  filteredProducts.value = props.products;
-  focusInput();
-  console.log('SCANEADO')
+  if (matchingProduct) {
+    addProduct(matchingProduct);
+    filteredProducts.value = props.products;
+    focusInput();
+    console.log('SCANEADO');
+  }
+  resetInactivityTimer(); // Reiniciar el timer al presionar Enter
 };
 
 // Autoagrega solo si no estamos buscando
@@ -154,4 +160,28 @@ watch(
   },
   { deep: true }
 );
+
+// Detectar inactividad
+const resetInactivityTimer = () => {
+  clearTimeout(inactivityTimeout.value);
+  inactivityTimeout.value = setTimeout(focusInput, inactivityTime);
+};
+
+// Inicializar el timer al montar el componente
+onMounted(() => {
+  resetInactivityTimer();
+
+  // Reiniciar el timer en eventos de interacción del usuario
+  window.addEventListener('mousemove', resetInactivityTimer);
+  window.addEventListener('keypress', resetInactivityTimer);
+  window.addEventListener('click', resetInactivityTimer);
+});
+
+// Limpiar el timer al desmontar el componente
+onUnmounted(() => {
+  clearTimeout(inactivityTimeout.value);
+  window.removeEventListener('mousemove', resetInactivityTimer);
+  window.removeEventListener('keypress', resetInactivityTimer);
+  window.removeEventListener('click', resetInactivityTimer);
+});
 </script>

@@ -61,7 +61,7 @@ export const usePosPayment = () => {
           items: dataReceipt.items,
           total: dataReceipt.total,
           empresa: 'EMPRENDIMIENTO GEORGINA MANOUKIAN',
-          direccion: 'Av. Francisco de Miranda sector La Laguna frente a la garza',
+          direccion: 'Av. Francisco de Miranda Sector La Laguna',
           rif: 'N-CRNE2025/55212',
           telefono: '0414-7790151',
           subtotalGeneral: dataReceipt.subtotalGeneral,
